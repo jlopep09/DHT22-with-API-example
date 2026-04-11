@@ -1,0 +1,43 @@
+services:
+  mariadb:
+    image: mariadb
+    restart: "no"
+    environment:
+      MARIADB_ROOT_PASSWORD: 123456
+    ports:
+      - 3306:3306
+    volumes:
+      - ./db:/var/lib/mysql
+    networks:
+      - dht_network
+  backend:
+    build:
+      context: ./backend/
+      target: builder
+    environment:
+      PORT: 8000
+    ports:
+      - '8000:8000'
+    restart: "no"
+    volumes:
+      - ./backend/api:/code/app
+    networks:
+      - dht_network
+
+  web:
+    build: ./ui/
+    networks:
+      - dht_network
+    ports:
+      - "5173:5173"
+    expose:
+      - 5173
+    restart: "no"
+    volumes:
+      - ./ui:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+networks:
+  dht_network:
